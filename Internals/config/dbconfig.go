@@ -15,8 +15,8 @@ func Databaseinit() {
 
 	host := "localhost"
 	user := "postgres"
-	password := "@Selam09"
-	dbName := "Santimpayfoodorderapi"
+	password := "santim@menu321"
+	dbName := "santimMenuDb"
 	port := 5432
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable ", host, user, password, dbName, port)
