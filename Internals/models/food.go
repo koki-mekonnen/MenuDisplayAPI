@@ -25,7 +25,7 @@ func (base *Model) BeforeCreate(scope *gorm.DB) error {
 // Menu represents a food menu item
 type Menu struct {
 	Model
-	FoodName          string  `json:"name " gorm:"unique_index"`
+	FoodName          string  `json:"name" gorm:"unique_index"`
 	Description       string  `json:"description"`
 	Price             float64 `json:"price"`
 	Image             string   `json:"image`

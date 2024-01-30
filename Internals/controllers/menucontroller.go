@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"foodorderapi/internals/config"
 	"foodorderapi/internals/models"
 	"net/http"
@@ -27,12 +28,17 @@ func CreateMenu(c echo.Context) error {
 	var merchants *models.Merchant
 	merchantID := c.Get("merchantID").(string)
 
+	fmt.Println(merchantID)
+
 	if res := db.Where("id = ?", merchantID).Find(&merchants); res.Error != nil {
 		data := map[string]interface{}{
 			"message": "Merchant not found",
 		}
 		return c.JSON(http.StatusInternalServerError, data)
 	}
+
+
+		fmt.Println(merchants.Id)
 
 	var menu *models.Menu
 
@@ -41,13 +47,16 @@ func CreateMenu(c echo.Context) error {
 	}
 
 	newmenu := &models.Menu{
-		FoodName:          menu.FoodName,
-		Description:       menu.Description,
-		Price:             menu.Price,
+		FoodName:menu.FoodName,
+		Description:menu.Description,
+		Price:menu.Price,
 		Image:menu.Image,
-		MerchantID:        merchants.Id,
+		MerchantID:merchants.Id,
 		MerchantShortCode: merchants.MerchantShortcode,
 	}
+
+
+
 
 	if err := db.Create(&newmenu).Error; err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to create menu")
