@@ -33,7 +33,7 @@ func Foodorderroutes(e *echo.Echo) {
 	merchantauth := e.Group("/merchant")
 	merchantauth.POST("/", controllers.Signin)
 	merchantauth.POST("/forgetpassword", controllers.Forgetpassword)
-	merchantauth.POST("/displaymenu",controllers.DisplayMenu)
+	merchantauth.POST("/displaymenu", controllers.DisplayMenu)
 
 	merchantroute := e.Group("/merchants")
 

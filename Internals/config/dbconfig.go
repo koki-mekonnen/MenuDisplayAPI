@@ -15,9 +15,9 @@ func Databaseinit() {
 
 	host := "localhost"
 	user := "postgres"
-	password := "@Selam09"
-	dbName := "Santimpayfoodorderapi"
-	port := 5432
+	password := "santim@menu321"
+	dbName := "santimMenuDb"
+	port := 5444
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable ", host, user, password, dbName, port)
 	database, e = gorm.Open(postgres.Open(dsn), &gorm.Config{})

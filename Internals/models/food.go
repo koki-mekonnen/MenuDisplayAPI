@@ -28,7 +28,7 @@ type Menu struct {
 	FoodName          string  `json:"name" gorm:"unique_index"`
 	Description       string  `json:"description"`
 	Price             float64 `json:"price"`
-	Image             string   `json:"image`
+	Image             string  `json:"image`
 	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
 }
@@ -37,7 +37,7 @@ type UpdateMenu struct {
 	FoodName    string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
-    Image   string   `json:"image`
+	Image       string  `json:"image`
 }
 
 // Order represents a food order
