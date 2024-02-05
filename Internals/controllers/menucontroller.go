@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"foodorderapi/internals/config"
 	"foodorderapi/internals/models"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 // CreateMenu creates a new menu item
 
 func CreateMenu(c echo.Context) error {
-
 	role := c.Get("role").(string)
 
 	// Check if the role is merchant
@@ -28,8 +26,6 @@ func CreateMenu(c echo.Context) error {
 	var merchants *models.Merchant
 	merchantID := c.Get("merchantID").(string)
 
-	fmt.Println(merchantID)
-
 	if res := db.Where("id = ?", merchantID).Find(&merchants); res.Error != nil {
 		data := map[string]interface{}{
 			"message": "Merchant not found",
@@ -37,32 +33,27 @@ func CreateMenu(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
-
-		fmt.Println(merchants.Id)
-
 	var menu *models.Menu
 
 	if err := c.Bind(&menu); err != nil {
 		return c.String(http.StatusBadRequest, "Invalid request payload")
 	}
 
-	newmenu := &models.Menu{
-		FoodName:menu.FoodName,
-		Description:menu.Description,
-		Price:menu.Price,
-		Image:menu.Image,
-		MerchantID:merchants.Id,
+	newMenu := &models.Menu{
+		FoodName:          menu.FoodName,
+		Ingredients:       menu.Ingredients,
+		Price:             menu.Price,
+		Image:             menu.Image,
+		MerchantID:        merchants.Id,
 		MerchantShortCode: merchants.MerchantShortcode,
+		FoodGroup:         menu.FoodGroup,
 	}
 
-
-
-
-	if err := db.Create(&newmenu).Error; err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to create menu")
+	if err := db.Create(&newMenu).Error; err != nil {
+		return c.String(http.StatusInternalServerError,err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, newmenu)
+	return c.JSON(http.StatusCreated, newMenu)
 }
 
 func ShowAllMenus(c echo.Context) error {
@@ -121,6 +112,8 @@ func GetFood(c echo.Context) error {
 	return c.JSON(http.StatusOK, food)
 }
 
+
+
 func UpdateMenu(c echo.Context) error {
 	role := c.Get("role").(string)
 
@@ -168,7 +161,7 @@ func UpdateMenu(c echo.Context) error {
 	}
 
 	menu.FoodName = payload.FoodName
-	menu.Description = payload.Description
+	menu.Ingredients = payload.Ingredients
 	menu.Price = payload.Price
 	menu.Image=payload.Image
 
@@ -281,6 +274,30 @@ func OrderFood(c echo.Context) error {
 }
 
 
+func GetFoodByType(c echo.Context) error {
+    db := config.DB()
+    foodGroup := c.QueryParam("foodgroup")
+
+    var reqBody struct {
+        MerchantShortcode int64 `json:"merchantshortcode"`
+    }
+
+    if err := c.Bind(&reqBody); err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+    }
+
+    var foods []models.Menu
+
+    if res := db.Where("? = ANY(food_group) AND merchant_short_code = ?", foodGroup, reqBody.MerchantShortcode).Find(&foods); res.Error != nil {
+        data := map[string]interface{}{
+            "message": res.Error.Error(),
+        }
+
+        return c.JSON(http.StatusInternalServerError, data)
+    }
+
+    return c.JSON(http.StatusOK, foods)
+}
 
 func DisplayMenu(c echo.Context) error {
 	db := config.DB()

@@ -34,7 +34,7 @@ func Foodorderroutes(e *echo.Echo) {
 	merchantauth.POST("/", controllers.Signin)
 	merchantauth.POST("/forgetpassword", controllers.Forgetpassword)
 	merchantauth.POST("/displaymenu", controllers.DisplayMenu)
-
+    merchantauth.POST("/displaymenubytype", controllers.GetFoodByType)
 	merchantroute := e.Group("/merchants")
 
 	// ROUTES WHICH NEED MERCHANT TOKEN
@@ -50,5 +50,6 @@ func Foodorderroutes(e *echo.Echo) {
 	menuroute.PUT("/updatemenu/:id", controllers.UpdateMenu)
 	menuroute.DELETE("/deletemenu/:id", controllers.DeleteMenu)
 	menuroute.POST("/orderfood/:id", controllers.OrderFood)
+
 
 }

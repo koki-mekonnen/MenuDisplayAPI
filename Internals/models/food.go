@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -26,16 +27,17 @@ func (base *Model) BeforeCreate(scope *gorm.DB) error {
 type Menu struct {
 	Model
 	FoodName          string  `json:"name" gorm:"unique_index"`
-	Description       string  `json:"description"`
+	Ingredients       string  `json:"ingredients"`
 	Price             float64 `json:"price"`
 	Image             string  `json:"image`
 	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
+FoodGroup         pq.StringArray `gorm:"type:text[]" json:"foodgroup"`
 }
 
 type UpdateMenu struct {
 	FoodName    string  `json:"name"`
-	Description string  `json:"description"`
+	Ingredients string  `json:"ingredients"`
 	Price       float64 `json:"price"`
 	Image       string  `json:"image`
 }
