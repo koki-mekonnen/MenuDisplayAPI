@@ -15,7 +15,7 @@ func Databaseinit() {
 
 	host := "localhost"
 	user := "postgres"
-	password := "santim@menu321"
+	password := "santim@menu123"
 	dbName := "santimMenuDb"
 	port := 5444
 
@@ -24,6 +24,8 @@ func Databaseinit() {
 
 	if e != nil {
 		panic(e)
+		
+
 	}
 
 	if e = database.AutoMigrate(
