@@ -205,7 +205,7 @@ func DeleteMenu(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
-	if res := db.Where("id = ?", id).First(&menu); res.Error != nil {
+	if res := db.Where("id = ?", id).Find(&menu); res.Error != nil {
 		data := map[string]interface{}{
 			"message": res.Error.Error(),
 		}
