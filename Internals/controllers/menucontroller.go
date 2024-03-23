@@ -127,11 +127,11 @@ func UpdateMenu(c echo.Context) error {
 
 	db := config.DB()
 
-	menuID := c.Param("menuID")
+	menuID := c.Param("id")
 
 	var menu models.Menu
 	var payload models.UpdateMenu
-	var merchant *models.Merchant
+	var merchant models.Merchant
 
 	merchantID := c.Get("merchantID").(string)
 
@@ -142,14 +142,7 @@ func UpdateMenu(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
-	if res := db.Where("merchant_id = ?", merchantID).Find(&menu); res.Error != nil {
-		data := map[string]interface{}{
-			"message": "Merchant not found",
-		}
-		return c.JSON(http.StatusInternalServerError, data)
-	}
-
-	if res := db.Where("id=?", menuID).Find(&menu); res.Error != nil {
+	if res := db.Where("id = ? AND merchant_id = ?", menuID, merchantID).First(&menu); res.Error != nil {
 		data := map[string]interface{}{
 			"message": "Menu not found",
 		}
@@ -160,20 +153,85 @@ func UpdateMenu(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid request payload")
 	}
 
-	menu.FoodName = payload.FoodName
-	menu.Ingredients = payload.Ingredients
-	menu.Price = payload.Price
-	menu.Image=payload.Image
+	if payload.FoodName != "" {
+		menu.FoodName = payload.FoodName
+	}
+	if payload.Ingredients != "" {
+		menu.Ingredients = payload.Ingredients
+	}
+	if payload.Price != 0 {
+		menu.Price = payload.Price
+	}
+	if payload.Image != "" {
+		menu.Image = payload.Image
+	}
 
 	if err := db.Save(&menu).Error; err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to update menu")
+		return c.String(http.StatusInternalServerError, "Failed to update menu. Please try again with a new food name.")
 	}
 
 	return c.JSON(http.StatusOK, menu)
 }
 
-func DeleteMenu(c echo.Context) error {
+// func DeleteMenu(c echo.Context) error {
 
+// 	role := c.Get("role").(string)
+
+// 	// Check if the role is merchant
+// 	if role != "merchant" {
+// 		data := map[string]interface{}{
+// 			"message": "Access denied. Only merchants can perform this operation.",
+// 		}
+// 		return c.JSON(http.StatusForbidden, data)
+// 	}
+// 	db := config.DB()
+
+// 	id := c.Param("id")
+
+// 	var menu models.Menu
+// 	var merchant models.Merchant
+// 	merchantID := c.Get("merchantID").(string)
+
+// 	if res := db.Where("id = ?", merchantID).Find(&merchant); res.Error != nil {
+// 		data := map[string]interface{}{
+// 			"message": "Merchant not found",
+// 		}
+// 		return c.JSON(http.StatusInternalServerError, data)
+// 	}
+
+// 	if res := db.Where("merchant_id = ?", merchantID).Find(&menu); res.Error != nil {
+// 		data := map[string]interface{}{
+// 			"message": "Merchant not found",
+// 		}
+// 		return c.JSON(http.StatusInternalServerError, data)
+// 	}
+
+// 	if res := db.Where("id = ?", id).Find(&menu); res.Error != nil {
+// 		data := map[string]interface{}{
+// 			"message": res.Error.Error(),
+// 		}
+
+// 		return c.JSON(http.StatusNotFound, data)
+// 	}
+
+// 	if res := db.Delete(&menu); res.Error != nil {
+// 		data := map[string]interface{}{
+// 			"message": res.Error.Error(),
+// 		}
+
+// 		return c.JSON(http.StatusInternalServerError, data)
+// 	}
+
+// 	data := map[string]interface{}{
+// 		"message": "Food item deleted successfully",
+// 	}
+
+// 	return c.JSON(http.StatusOK, data)
+// }
+
+
+
+func DeleteMenu(c echo.Context) error {
 	role := c.Get("role").(string)
 
 	// Check if the role is merchant
@@ -183,50 +241,45 @@ func DeleteMenu(c echo.Context) error {
 		}
 		return c.JSON(http.StatusForbidden, data)
 	}
+
 	db := config.DB()
 
-	id := c.Param("id")
+	merchantID := c.Get("merchantID").(string)
+	menuID := c.Param("id")
 
 	var menu models.Menu
-	var merchant models.Merchant
-	merchantID := c.Get("merchantID").(string)
 
-	if res := db.Where("id = ?", merchantID).Find(&merchant); res.Error != nil {
+	// Find the menu item by ID and associated merchant ID
+	if res := db.Where("id = ? AND merchant_id = ?", menuID, merchantID).First(&menu); res.Error != nil {
 		data := map[string]interface{}{
-			"message": "Merchant not found",
+			"message": "Menu item not found",
 		}
-		return c.JSON(http.StatusInternalServerError, data)
-	}
-
-	if res := db.Where("merchant_id = ?", merchantID).Find(&menu); res.Error != nil {
-		data := map[string]interface{}{
-			"message": "Merchant not found",
-		}
-		return c.JSON(http.StatusInternalServerError, data)
-	}
-
-	if res := db.Where("id = ?", id).Find(&menu); res.Error != nil {
-		data := map[string]interface{}{
-			"message": res.Error.Error(),
-		}
-
 		return c.JSON(http.StatusNotFound, data)
 	}
 
+	// Delete the menu item
 	if res := db.Delete(&menu); res.Error != nil {
 		data := map[string]interface{}{
 			"message": res.Error.Error(),
 		}
-
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
 	data := map[string]interface{}{
 		"message": "Food item deleted successfully",
 	}
-
 	return c.JSON(http.StatusOK, data)
 }
+
+
+
+
+
+
+
+
+
+
 
 // Food Order Routes
 

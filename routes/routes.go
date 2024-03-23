@@ -47,7 +47,7 @@ func Foodorderroutes(e *echo.Echo) {
 	menuroute.POST("/addnewmenu", controllers.CreateMenu)
 	menuroute.GET("/getallmenus", controllers.ShowAllMenus)
 	menuroute.GET("/getsinglemenu/:id", controllers.GetFood)
-	menuroute.PUT("/updatemenu/:id", controllers.UpdateMenu)
+	menuroute.PATCH("/updatemenu/:id", controllers.UpdateMenu)
 	menuroute.DELETE("/deletemenu/:id", controllers.DeleteMenu)
 	menuroute.POST("/orderfood/:id", controllers.OrderFood)
 
