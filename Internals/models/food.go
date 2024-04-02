@@ -26,13 +26,13 @@ func (base *Model) BeforeCreate(scope *gorm.DB) error {
 // Menu represents a food menu item
 type Menu struct {
 	Model
-	FoodName          string  `json:"name" gorm:"unique"`
+	FoodName          string  `json:"name"`
 	Ingredients       string  `json:"ingredients"`
 	Price             float64 `json:"price"`
 	Image             string  `json:"image`
 	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
-FoodGroup         pq.StringArray `gorm:"type:text[]" json:"foodgroup"`
+    FoodGroup         pq.StringArray `gorm:"type:text[]" json:"foodgroup"`
 }
 
 type UpdateMenu struct {

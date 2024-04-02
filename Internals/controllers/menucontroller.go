@@ -39,23 +39,32 @@ func CreateMenu(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid request payload")
 	}
 
+	// Check if the food name and merchant ID already exist in the menu table
+	existingMenu := &models.Menu{}
+	if res := db.Where("food_name = ? AND merchant_id = ?", menu.FoodName,merchantID).First(existingMenu); res.Error == nil {
+		// Menu already exists
+		data := map[string]interface{}{
+			"message": "Menu already exists for the provided food name and merchant ID",
+		}
+		return c.JSON(http.StatusConflict, data)
+	}
+
 	newMenu := &models.Menu{
 		FoodName:          menu.FoodName,
 		Ingredients:       menu.Ingredients,
 		Price:             menu.Price,
 		Image:             menu.Image,
-		MerchantID:        merchants.Id,
+		MerchantID:        merchantID,
 		MerchantShortCode: merchants.MerchantShortcode,
 		FoodGroup:         menu.FoodGroup,
 	}
 
 	if err := db.Create(&newMenu).Error; err != nil {
-		return c.String(http.StatusInternalServerError,err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, newMenu)
 }
-
 func ShowAllMenus(c echo.Context) error {
 
 	role := c.Get("role").(string)
