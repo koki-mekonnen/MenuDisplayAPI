@@ -4,6 +4,7 @@ import (
 	"foodorderapi/internals/config"
 	"foodorderapi/internals/models"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -56,7 +57,8 @@ func CreateMenu(c echo.Context) error {
 		Image:             menu.Image,
 		MerchantID:        merchantID,
 		MerchantShortCode: merchants.MerchantShortcode,
-		FoodGroup:         menu.FoodGroup,
+		FoodCategory:         menu.FoodCategory,
+		IsFasting:            menu.IsFasting,
 	}
 
 	if err := db.Create(&newMenu).Error; err != nil {
@@ -92,7 +94,7 @@ func ShowAllMenus(c echo.Context) error {
 
 	if res := db.Where("merchant_id = ?", merchantID).Find(&menus); res.Error != nil {
 		data := map[string]interface{}{
-			"message": "Merchant not found",
+			"message": "Menu not found",
 		}
 		return c.JSON(http.StatusInternalServerError, data)
 	}
@@ -280,7 +282,52 @@ func DeleteMenu(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
+func MerchantGetFoodByCategory(c echo.Context) error {
+    db := config.DB()
+	merchantID := c.Get("merchantID").(string)
+	role:=c.Get("role").(string)
 
+    categoryID := c.Param("categoryid")
+
+	var merchant *models.Merchant
+	var category *models.Category
+	var menu []models.Menu
+
+	if role != "merchant" {
+		data := map[string]interface{}{
+			"message": "Access denied. Only merchants can perform this operation.",
+		}
+		return c.JSON(http.StatusForbidden, data)
+	}
+
+   if res := db.Where("id = ?", merchantID).Find(&merchant); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Merchant not found",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+   
+
+    if res := db.Where("id = ? AND merchant_id= ?", categoryID, merchantID).Find(&category); res.Error != nil {
+        data := map[string]interface{}{
+            "message": res.Error.Error(),
+        }
+
+        return c.JSON(http.StatusInternalServerError, data)
+    }
+
+
+	if res:=db.Where("food_category = ? AND merchant_id = ?",category.Categoryname, merchantID).Find(&menu);res.Error!=nil{
+		 data := map[string]interface{}{
+            "message": res.Error.Error(),
+        }
+
+        return c.JSON(http.StatusInternalServerError, data)
+	}
+
+    return c.JSON(http.StatusOK, menu)
+}
 
 
 
@@ -336,9 +383,13 @@ func OrderFood(c echo.Context) error {
 }
 
 
-func GetFoodByType(c echo.Context) error {
+func GetFoodByCategory(c echo.Context) error {
     db := config.DB()
-    foodGroup := c.QueryParam("foodgroup")
+    // foodGroup := c.QueryParam("foodcategory")
+    categoryID := c.Param("categoryid")
+
+    var category *models.Category
+    var menu []models.Menu
 
     var reqBody struct {
         MerchantShortcode int64 `json:"merchantshortcode"`
@@ -348,18 +399,31 @@ func GetFoodByType(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
     }
 
-    var foods []models.Menu
-
-    if res := db.Where("? = ANY(food_group) AND merchant_short_code = ?", foodGroup, reqBody.MerchantShortcode).Find(&foods); res.Error != nil {
+    if res := db.Where("id = ? AND merchant_short_code = ?", categoryID, reqBody.MerchantShortcode).Find(&category); res.Error != nil {
         data := map[string]interface{}{
             "message": res.Error.Error(),
         }
-
         return c.JSON(http.StatusInternalServerError, data)
     }
 
-    return c.JSON(http.StatusOK, foods)
+    if res := db.Where("food_category = ? AND merchant_short_code = ?", category.Categoryname, reqBody.MerchantShortcode).Find(&menu); res.Error != nil {
+        data := map[string]interface{}{
+            "message": res.Error.Error(),
+        }
+        return c.JSON(http.StatusInternalServerError, data)
+    }
+
+    return c.JSON(http.StatusOK, menu)
 }
+
+
+
+
+
+
+
+
+
 
 func DisplayMenu(c echo.Context) error {
 	db := config.DB()
@@ -387,4 +451,39 @@ var reqBody struct {
 	}
 
 	return c.JSON(http.StatusOK, food)
+}
+
+
+func FetchMenusByFastingStatus(c echo.Context) error {
+	db := config.DB()
+	var menus []models.Menu
+
+
+		
+var reqBody struct {
+		MerchantShortcode int64 `json:"merchantshortcode"`
+	}
+
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+
+	isFastingStr := c.QueryParam("isfasting")
+	isFasting, err := strconv.ParseBool(isFastingStr)
+	if err != nil {
+		data := map[string]interface{}{
+			"message": "Invalid isfasting parameter",
+		}
+		return c.JSON(http.StatusBadRequest, data)
+	}
+
+	if res := db.Where("is_fasting = ? AND merchant_short_code=?", isFasting,reqBody.MerchantShortcode).Find(&menus); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Menus not found",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+	return c.JSON(http.StatusOK, menus)
 }

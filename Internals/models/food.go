@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -29,17 +28,18 @@ type Menu struct {
 	FoodName          string  `json:"name"`
 	Ingredients       string  `json:"ingredients"`
 	Price             float64 `json:"price"`
-	Image             string  `json:"image`
+	Image             string  `json:"image"`
 	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
-    FoodGroup         pq.StringArray `gorm:"type:text[]" json:"foodgroup"`
+    FoodCategory       string ` json:"foodcategory"`
+	IsFasting          bool    `json:"is_fasting"`
 }
 
 type UpdateMenu struct {
 	FoodName    string  `json:"name"`
 	Ingredients string  `json:"ingredients"`
 	Price       float64 `json:"price"`
-	Image       string  `json:"image`
+	Image       string  `json:"image"`
 }
 
 // Order represents a food order
@@ -59,6 +59,39 @@ type Customer struct {
 	Address     string  `gorm:"size:255;" json:"address"`
 }
 
+
+
+type Category struct{
+	Model
+	Categoryname string `json:"categoryname" gorm:"not null"`
+	Categorydescription string `json:"categorydescription"`
+	Categoryimage string `json:"categoryimage"`
+	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
+	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
+}
+
+type UpdateCategory struct{
+	
+	Categoryname string `json:"categoryname" gorm:"not null"`
+	Categorydescription string `json:"categorydescription"`
+	Categoryimage string `json:"categoryimage"`
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // OrderRequest represents the request payload for creating an order
 type OrderRequest struct {
 	MenuID   string `json:"menu_id"`
@@ -69,3 +102,5 @@ type OrderRequest struct {
 		Phone   string `json:"phone"`
 	} `json:"customer"`
 }
+
+

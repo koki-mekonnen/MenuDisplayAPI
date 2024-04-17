@@ -13,13 +13,17 @@ var e error
 
 func Databaseinit() {
 
-	host := "localhost"
-	user := "postgres"
-	password := "santim@menu123"
-	dbName := "santimMenuDb"
-	port := 5444
+	// host := "localhost"
+	// user := "postgres"
+	// password := "santim@menu123"
+	// dbName := "santimMenuDb"
+	// port := 5444
 
-
+host:="localhost"
+user:="postgres"
+password:="@Selam09"
+dbName := "Santimpayfoodorderapi"
+port := 5432
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable ", host, user, password, dbName, port)
 	database, e = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -37,6 +41,7 @@ func Databaseinit() {
 		&models.Merchant{},
 		&models.Admin{},
 		&models.General{},
+		&models.Category{},
 	); e != nil {
 		panic(e)
 	}

@@ -33,8 +33,12 @@ func Foodorderroutes(e *echo.Echo) {
 	merchantauth := e.Group("/merchant")
 	merchantauth.POST("/", controllers.Signin)
 	merchantauth.POST("/forgetpassword", controllers.Forgetpassword)
-	merchantauth.POST("/displaymenu", controllers.DisplayMenu)
-    merchantauth.POST("/displaymenubytype", controllers.GetFoodByType)
+	// merchantauth.POST("/displaymenu", controllers.DisplayMenu)
+    // merchantauth.POST("/menubycategory/:categoryid", controllers.GetFoodByCategory)
+  merchantauth.POST("/numberofmenubycategory", controllers.FoodNumberByCategory)
+//   merchantauth.POST("/displaycategory", controllers.DisplayCategory)
+	
+	
 	merchantroute := e.Group("/merchants")
 
 	// ROUTES WHICH NEED MERCHANT TOKEN
@@ -49,7 +53,30 @@ func Foodorderroutes(e *echo.Echo) {
 	menuroute.GET("/getsinglemenu/:id", controllers.GetFood)
 	menuroute.PATCH("/updatemenu/:id", controllers.UpdateMenu)
 	menuroute.DELETE("/deletemenu/:id", controllers.DeleteMenu)
-	menuroute.POST("/orderfood/:id", controllers.OrderFood)
+
+    categoryroute :=e.Group("/category")
+	categoryroute.Use(middleware.ValidateToken)
+	categoryroute.POST("/new",controllers.CreateCategory)
+	categoryroute.GET("/all",controllers.GetCategory)
+	categoryroute.PATCH("/:id",controllers.EditCategory)
+	categoryroute.DELETE("/:id",controllers.DeleteCategory)
+	categoryroute.GET("/foods/:categoryid",controllers.MerchantGetFoodByCategory)
+	
+
+
+	//user routes
+
+	userroutes:=e.Group("/user")
+	userroutes.POST("/displayallmenu",controllers.DisplayMenu)
+	userroutes.POST("/displayallcategory",controllers.DisplayCategory)
+	userroutes.POST("/menubycategory/:categoryid", controllers.GetFoodByCategory)
+    userroutes.POST("/numberofmenubycategory", controllers.FoodNumberByCategory)
+userroutes.POST("/fetchmenusbyfastingstatus",controllers.FetchMenusByFastingStatus)
+
+
+
+
+	// menuroute.POST("/orderfood/:id", controllers.OrderFood)
 
 
 }
