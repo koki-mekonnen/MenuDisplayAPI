@@ -82,9 +82,9 @@ func Signin(c echo.Context) error {
 func UpdateMerchant(c echo.Context) error {
 
 	db := config.DB()
-	merchantID := c.Param("id")
+	// merchantID := c.Param("id")
 
-	// merchantID := c.Get("merchantID").(string)
+	merchantID := c.Get("merchantID").(string)
 
 	// Retrieve the existing merchant from the database
 	var existingMerchant *models.Merchant
@@ -182,7 +182,6 @@ func Forgetpassword(c echo.Context) error {
 	db := config.DB()
 
 	var payload *models.Signininputs
-	var general *models.General
 	var merchant *models.Merchant
 
 	if err := c.Bind(&payload); err != nil {
@@ -193,26 +192,18 @@ func Forgetpassword(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
-	phoneNumber := payload.Phonenumber
+	MerchantShortcode := payload.MerchantShortcode
 
-	if phoneNumber == 0 {
+	if MerchantShortcode == 0 {
 		data := map[string]interface{}{
 			"message": "Please fill out your phone number.",
 		}
 		return c.JSON(http.StatusUnauthorized, data)
 	}
 
-	if res := db.Where("phonenumber = ?", phoneNumber).Find(&general); res.Error != nil {
+	
 
-		data := map[string]interface{}{
-			"message": "you are not allowed to use this system! Please Register first",
-		}
-
-		return c.JSON(http.StatusForbidden, data)
-
-	}
-
-	if err := db.Where("phonenumber = ?", phoneNumber).First(&merchant).Error; err != nil {
+	if err := db.Where("merchant_shortcode = ?", MerchantShortcode).First(&merchant).Error; err != nil {
 		// Handle query execution error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 
@@ -226,29 +217,43 @@ func Forgetpassword(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, data)
 	}
 
-	if !general.IsActive {
-		data := map[string]interface{}{
-			"message": "you are currently inactive Please contact the support team",
-		}
-		return c.JSON(http.StatusForbidden, data)
-	}
-
-	ttl := 24 * time.Hour
-
-	access_token, err := utils.Createtoken(ttl, general.Id, general.Role, []byte(general.PrivateKey))
-	if err != nil {
-		data := map[string]interface{}{
-			"message": err.Error(),
-		}
-		return c.JSON(http.StatusBadRequest, data)
-	}
-
-	response := map[string]interface{}{
-		"access_token": access_token,
+	
+    response := map[string]interface{}{
+		
 		"user":         merchant,
 	}
 
 	return c.JSON(http.StatusOK, response)
 
 }
+
+
+
+
+func GetMerchantByShortCode(c echo.Context)error{
+	db:=config.DB()
+	var merchant models.Merchant
+
+
+	var reqBody struct {
+		MerchantShortcode int64 `json:"merchantshortcode"`
+	}
+
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if res:=db.Where("merchant_shortcode=?",reqBody.MerchantShortcode).Find(&merchant);res.Error!=nil{
+		data := map[string]interface{}{
+			"message": "Merchant not found",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+
+	}
+
+
+	return c.JSON(http.StatusOK,merchant)
+}
+
+
 

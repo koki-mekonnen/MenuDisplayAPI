@@ -61,17 +61,22 @@ func Foodorderroutes(e *echo.Echo) {
 	categoryroute.PATCH("/:id",controllers.EditCategory)
 	categoryroute.DELETE("/:id",controllers.DeleteCategory)
 	categoryroute.GET("/foods/:categoryid",controllers.MerchantGetFoodByCategory)
-	
+	categoryroute.GET("/numberofcategories",controllers.NumberofCategoriesforMerchant)
+	categoryroute.GET("/numberoffoods",controllers.NumberofMenusforMerchant)
 
 
 	//user routes
 
 	userroutes:=e.Group("/user")
+	userroutes.POST("/getmerchantdetail",controllers.GetMerchantByShortCode)
 	userroutes.POST("/displayallmenu",controllers.DisplayMenu)
 	userroutes.POST("/displayallcategory",controllers.DisplayCategory)
 	userroutes.POST("/menubycategory/:categoryid", controllers.GetFoodByCategory)
     userroutes.POST("/numberofmenubycategory", controllers.FoodNumberByCategory)
-userroutes.POST("/fetchmenusbyfastingstatus",controllers.FetchMenusByFastingStatus)
+    userroutes.POST("/fetchmenusbyfastingstatus",controllers.FetchMenusByFastingStatus)
+    userroutes.POST("/numberofcategories",controllers.NumberofCategories)
+	userroutes.POST("/numberoffoods",controllers.NumberofMenus)
+
 
 
 

@@ -176,6 +176,9 @@ func UpdateMenu(c echo.Context) error {
 	if payload.Image != "" {
 		menu.Image = payload.Image
 	}
+	if payload.FoodCategory !=""{
+		menu.FoodCategory=payload.FoodCategory
+	}
 
 	if err := db.Save(&menu).Error; err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to update menu. Please try again with a new food name.")

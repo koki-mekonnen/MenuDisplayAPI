@@ -58,7 +58,7 @@ type Merchantsignin struct {
 }
 
 type Signininputs struct {
-	Phonenumber int64 `gorm:"uniqueIndex" validate:"required,ethiopianPhoneNumber" json:"phonenumber"`
+	MerchantShortcode int64  `gorm:"unique_index" validate:"required" json:"merchantshortcode"`
 }
 
 type MerchantResponse struct {

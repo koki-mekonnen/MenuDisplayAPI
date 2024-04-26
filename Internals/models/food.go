@@ -40,6 +40,7 @@ type UpdateMenu struct {
 	Ingredients string  `json:"ingredients"`
 	Price       float64 `json:"price"`
 	Image       string  `json:"image"`
+	FoodCategory       string ` json:"foodcategory"`
 }
 
 // Order represents a food order

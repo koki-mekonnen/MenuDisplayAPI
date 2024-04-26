@@ -67,10 +67,14 @@ func CreateCategory(c echo.Context)error{
 
 
 func GetCategory(c echo.Context) error {
+
+
+
+
 	role := c.Get("role").(string)
 	merchantID := c.Get("merchantID").(string)
-	var merchants *models.Merchant
-	var category []models.Category
+	var merchants models.Merchant
+	var categories []models.Category
 
 	db := config.DB()
 
@@ -81,21 +85,22 @@ func GetCategory(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, data)
 	}
 
-	if res := db.Where("id = ?", merchantID).Find(&merchants); res.Error != nil {
+	if res := db.Where("id = ?", merchantID).First(&merchants); res.Error != nil {
 		data := map[string]interface{}{
 			"message": "Merchant not found",
 		}
 		return c.JSON(http.StatusNotFound, data)
 	}
 
-	if res := db.Where("merchant_id = ?", merchantID).Find(&category); res.Error != nil {
+	if res := db.Where("merchant_id = ?", merchantID).Find(&categories); res.Error != nil {
 		data := map[string]interface{}{
 			"message": "Category not found",
 		}
 		return c.JSON(http.StatusNotFound, data)
 	}
 
-	return c.JSON(http.StatusOK, category)
+	
+	return c.JSON(http.StatusOK, categories)
 }
 
 
@@ -228,7 +233,7 @@ func DisplayCategory(c echo.Context)error{
 
 	db:=config.DB()
 	var category []models.Category
-	
+	var merchant models.Merchant
 
 var reqBody struct {
 		MerchantShortcode int64 `json:"merchantshortcode"`
@@ -239,12 +244,25 @@ var reqBody struct {
 	}
 
 
+if res:=db.Where("merchant_shortcode=?",reqBody.MerchantShortcode).Find(&merchant);  res.Error!=nil{
+data:=map[string]interface{}{
+		"message":"merchant not found",
+	}
+	return c.JSON(http.StatusInternalServerError,data)
+}
+
 if res:=db.Where("merchant_short_code=?",reqBody.MerchantShortcode).Find(&category);res.Error!=nil{
 	data:=map[string]interface{}{
 		"message":"category not found for this merchant",
 	}
 	return c.JSON(http.StatusInternalServerError,data)
 }
+
+
+  
+
+
+
 
 return  c.JSON(http.StatusOK,category)
 
@@ -290,6 +308,142 @@ func FoodNumberByCategory(c echo.Context) error {
 }
 
 
+func NumberofCategoriesforMerchant(c echo.Context)  error{
+	db:=config.DB()
+    var category []models.Category
+    role := c.Get("role").(string)
+
+	// Check if the role is merchant
+	if role != "merchant" {
+		data := map[string]interface{}{
+			"message": "Access denied. Only merchants can perform this operation.",
+		}
+		return c.JSON(http.StatusForbidden, data)
+	}
+
+	
+
+	merchantID := c.Get("merchantID").(string)
+
+
+	if res := db.Where("merchant_id = ?",merchantID).Find(&category); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Categories not found for this merchant",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+   categoryCount := len(category)
+
+	// data := map[string]interface{}{
+	// 	"message":         "Success",
+	// 	"categoryCount":   categoryCount,
+	// 	"merchantShortcode": reqBody.MerchantShortcode,
+	// }
+
+	return c.JSON(http.StatusOK, categoryCount)
+
+
+}
 
 
 
+func NumberofCategories(c echo.Context) error {
+	db := config.DB()
+
+	var category []models.Category
+	var reqBody struct {
+		MerchantShortcode int64 `json:"merchantshortcode"`
+	}
+
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if res := db.Where("merchant_short_code = ?", reqBody.MerchantShortcode).Find(&category); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Categories not found for this merchant",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+	categoryCount := len(category)
+
+	// data := map[string]interface{}{
+	// 	"message":         "Success",
+	// 	"categoryCount":   categoryCount,
+	// 	"merchantShortcode": reqBody.MerchantShortcode,
+	// }
+
+	return c.JSON(http.StatusOK, categoryCount)
+}
+
+
+func NumberofMenusforMerchant(c echo.Context)  error{
+	db:=config.DB()
+    var menu []models.Menu
+    role := c.Get("role").(string)
+
+	// Check if the role is merchant
+	if role != "merchant" {
+		data := map[string]interface{}{
+			"message": "Access denied. Only merchants can perform this operation.",
+		}
+		return c.JSON(http.StatusForbidden, data)
+	}
+
+	
+
+	merchantID := c.Get("merchantID").(string)
+
+
+	if res := db.Where("merchant_id = ?",merchantID).Find(&menu); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Categories not found for this merchant",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+   menuCount := len(menu)
+
+	// data := map[string]interface{}{
+	// 	"message":         "Success",
+	// 	"categoryCount":   categoryCount,
+	// 	"merchantShortcode": reqBody.MerchantShortcode,
+	// }
+
+	return c.JSON(http.StatusOK, menuCount)
+
+
+}
+
+
+func NumberofMenus(c echo.Context) error {
+	db := config.DB()
+
+	var menu []models.Menu
+	var reqBody struct {
+		MerchantShortcode int64 `json:"merchantshortcode"`
+	}
+
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if res := db.Where("merchant_short_code = ?", reqBody.MerchantShortcode).Find(&menu); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Categories not found for this merchant",
+		}
+		return c.JSON(http.StatusInternalServerError, data)
+	}
+
+	menuCount := len(menu)
+
+	// data := map[string]interface{}{
+	// 	"message":         "Success",
+	// 	"menuCount":   menuCount,
+	// 	"merchantShortcode": reqBody.MerchantShortcode,
+	// }
+
+	return c.JSON(http.StatusOK, menuCount)
+}
