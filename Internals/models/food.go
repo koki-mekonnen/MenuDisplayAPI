@@ -1,6 +1,9 @@
 package models
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,6 +36,7 @@ type Menu struct {
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
     FoodCategory       string ` json:"foodcategory"`
 	IsFasting          bool    `json:"is_fasting"`
+	
 }
 
 type UpdateMenu struct {
@@ -69,6 +73,7 @@ type Category struct{
 	Categoryimage string `json:"categoryimage"`
 	MerchantID        string  `json:"merchantid" gorm:"foreignkey"`
 	MerchantShortCode int64   ` gorm:"foreignkey" json:"merchantshortcode"`
+	Menu                []Menu `gorm:"-" json:"menu"`
 }
 
 type UpdateCategory struct{
@@ -80,6 +85,38 @@ type UpdateCategory struct{
 }
 
 
+
+
+func (c *Category) Value() (driver.Value, error) {
+	// Serialize the Menu field
+	// For example, convert it to JSON
+	serialized, err := json.Marshal(c.Menu)
+	if err != nil {
+		return nil, err
+	}
+	return driver.Value(serialized), nil
+}
+
+func (c *Category) Scan(value interface{}) error {
+	// Deserialize the value into the Menu field
+	// For example, convert it from JSON
+	if value == nil {
+		c.Menu = nil
+		return nil
+	}
+
+	// Assuming the value is of type []byte
+	serialized, ok := value.([]byte)
+	if !ok {
+		return errors.New("unexpected type received for Menu field")
+	}
+
+	err := json.Unmarshal(serialized, &c.Menu)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 
 

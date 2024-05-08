@@ -67,14 +67,11 @@ func CreateCategory(c echo.Context)error{
 
 
 func GetCategory(c echo.Context) error {
-
-
-
-
 	role := c.Get("role").(string)
 	merchantID := c.Get("merchantID").(string)
 	var merchants models.Merchant
 	var categories []models.Category
+	var menus []models.Menu // New variable to hold the menus
 
 	db := config.DB()
 
@@ -99,10 +96,21 @@ func GetCategory(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, data)
 	}
 
-	
-	return c.JSON(http.StatusOK, categories)
+	// Retrieve menus for each category
+for i := range categories {
+	category := &categories[i]
+	if res := db.Where("food_category = ? AND merchant_id = ?", category.Categoryname, merchantID).Find(&menus); res.Error != nil {
+		data := map[string]interface{}{
+			"message": "Menus not found for category",
+		}
+		return c.JSON(http.StatusNotFound, data)
+	}
+	category.Menu = menus // Assign menus to the category
+	menus = []models.Menu{} // Reset the menus slice for the next category
 }
 
+	return c.JSON(http.StatusOK, categories)
+}
 
 
 
